@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="a2607fba-2329-4c26-8541-a1aee161c7db" name="127.0.0.1" url="http://127.0.0.1:4200">
+        <fileTransfer host="127.0.0.1" port="2222" rootFolder="/home/vagrant/feederjs" accessType="SFTP" authAgent="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="2222" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
