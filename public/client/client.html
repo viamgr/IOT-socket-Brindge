@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Client</title>
+    <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
+    <script src="client.js"></script>
+</head>
+<body style="background-color:red">
+<h1>Android</h1>
+<form id="pair" action="/">
+    <input type="text" placeholder="Arduino Id" id="deviceId">
+    <br/>
+    <input type="submit" value="Pair">
+</form>
+
+<br/>
+<br/>
+<form id="form" action="/">
+    <input type="text" placeholder="Message" id="message">
+    <br/>
+    <input type="submit" value="Send">
+</form>
+<br/>
+<br/>
+
+<form id="setForm" action="/">
+    <input type="text" placeholder="Key" id="setKey">
+    <input type="text" placeholder="Value" id="setValue">
+    <br/>
+    <p id="setResult"></p>
+    <input type="submit" value="Send">
+</form>
+</body>
+
+</html>
