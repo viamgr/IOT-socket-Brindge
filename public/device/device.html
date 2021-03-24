@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Device</title>
     <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
+    <script src="../chunked-file-reader.js"></script>
     <script src="device.js"></script>
 
 </head>
@@ -13,6 +14,16 @@
 
     <form id="form" action="/">
         <input type="text" placeholder="Message" id="message">
+        <br/>
+        <input type="submit" value="Send">
+    </form>
+
+    <br/>
+    <br/>
+
+    <form id="fileForm" action="/">
+        <input type="file" id="file" />
+        <input type="file" id="file1" />
         <br/>
         <input type="submit" value="Send">
     </form>

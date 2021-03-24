@@ -5,6 +5,8 @@
     <title>Client</title>
     <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>
     <script src="client.js"></script>
+    <script src="../chunked-file-reader.js"></script>
+
 </head>
 <body style="background-color:red">
 <h1>Android</h1>
@@ -31,6 +33,27 @@
     <p id="setResult"></p>
     <input type="submit" value="Send">
 </form>
+
+<br/>
+<br/>
+
+<form id="fileForm" action="/">
+    <input type="file" id="file" />
+    <br/>
+    <input type="submit" value="Send">
+</form>
+
+<br/>
+<br/>
+
+<form id="requestFile" action="/aaa">
+    <input type="text" placeholder="filename" id="fileName">
+    <br/>
+    <input type="submit" value="Request">
+
+    <div id="fileResult" style="height: 200px;overflow: auto">Result</div>
+</form>
+
 </body>
 
 </html>
