@@ -116,8 +116,11 @@ function sendBinaryToPaired(me, message) {
 }
 
 wss.on('connection', function connection(ws, request, client) {
-    let me;
     console.log("device connected");
+
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
+    let me;
     ws.on('message', function incoming(message) {
         if (typeof message == 'string') {
             console.log(`Received message ${message}`);
@@ -160,11 +163,32 @@ wss.on('connection', function connection(ws, request, client) {
     });
 
     ws.on('close', function close() {
+        console.log('closed a connection');
+
         if (me) {
             console.log('closed a connection', me.id);
             unpairAndRemove(me);
         }
     });
+});
+
+function noop() {}
+
+function heartbeat() {
+    this.isAlive = true;
+}
+
+const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+
+        ws.isAlive = false;
+        ws.ping(noop);
+    });
+}, 2000);
+
+wss.on('close', function close() {
+    clearInterval(interval);
 });
 
 server.listen(4200, function () {

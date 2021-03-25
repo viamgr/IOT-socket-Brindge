@@ -16,14 +16,6 @@ function sendSlice(start, end) {
     if (firstFile.size > start){
         reader.readAsArrayBuffer(firstFile.slice(start, end));
     }
-    else {
-        ws.send(JSON.stringify({
-            key: 'client:text', message: {
-                key: 'file:send:finish',
-                name: firstFile.name
-            }
-        }));
-    }
 }
 
 function connect() {
