@@ -3,6 +3,8 @@ var deviceId;
 var chunkedFileReader;
 var reader;
 
+var fileSize = 0;
+var receivedChunkSize = 0;
 var firstFile;
 
 function cancelSendingFile() {
@@ -13,7 +15,7 @@ function cancelSendingFile() {
 
 function sendSlice(start, end) {
     console.log('file:request:slice', start, end);
-    if (firstFile.size > start){
+    if (firstFile.size > start) {
         reader.readAsArrayBuffer(firstFile.slice(start, end));
     }
 }
@@ -29,7 +31,6 @@ function connect() {
         ws.send(JSON.stringify({key: "client:subscribe"}));
         requestPair();
     };
-
     ws.onmessage = function (e) {
         if (typeof e.data == 'string') {
             console.log('Message:', e.data);
@@ -37,19 +38,16 @@ function connect() {
             switch (json.key) {
                 case "server:text":
                     switch (json.message.key) {
-                        case "file:start":
-                            console.log('file:start');
-                            break;
-                        case "file:finish":
-                            console.log('file:finish');
-                            break;
-                        case "file:request:slice":
+                        case "file:send:slice":
                             sendSlice(json.message.start, json.message.end);
                             break;
-                        case "file:request:done":
-                            console.log("File Sent");
+                        case "file:detail:callback":
+                            fileSize = json.message.length;
+                            ws.send(JSON.stringify({
+                                key: "client:text",
+                                message: {key: 'file:request:slice', start: 0}
+                            }));
                             break;
-
                     }
                     $("#setResult").text(JSON.stringify(json));
                     break;
@@ -59,9 +57,22 @@ function connect() {
                     break;
             }
         } else {
-            console.log('Binary Data', e.data);
-            let $fileResult = $("#fileResult");
-            $fileResult.text($fileResult.text() + new TextDecoder().decode(e.data));
+            // console.log('Binary Data', e.data);
+            receivedChunkSize += e.data.byteLength;
+
+            if (receivedChunkSize < fileSize) {
+                ws.send(JSON.stringify({
+                    key: "client:text",
+                    message: {key: 'file:request:slice', start: receivedChunkSize}
+                }));
+            } else {
+                ws.send(JSON.stringify({
+                    key: "client:text",
+                    message: {key: 'file:request:finished'}
+                }));
+            }
+            // let $fileResult = $("#fileResult");
+            // $fileResult.text($fileResult.text() + new TextDecoder().decode(e.data));
         }
 
     };
@@ -141,11 +152,13 @@ $(function () {
     });
 
     $("#requestFile").submit(function (ev) {
+        receivedChunkSize = 0;
+        fileSize = 0;
         ev.preventDefault();
         $("#fileResult").text('');
         ws.send(JSON.stringify({
             key: 'client:text', message: {
-                key: 'file:request',
+                key: 'file:detail:request',
                 name: $('#fileName').val()
             }
         }));

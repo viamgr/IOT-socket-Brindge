@@ -140,6 +140,9 @@ wss.on('connection', function connection(ws, request, client) {
                     me = addClient(json.message, ws, true);
                     sendPairedSignal(me.id);
                     break;
+                case "device:time":
+                    ws.send(JSON.stringify({key: "server:time", value: Math.floor(new Date().getTime() / 1000)}));
+                    break;
                 case "device:paired":
                     sendPairedSignal(me.id);
                     break;
@@ -172,7 +175,8 @@ wss.on('connection', function connection(ws, request, client) {
     });
 });
 
-function noop() {}
+function noop() {
+}
 
 function heartbeat() {
     this.isAlive = true;
@@ -185,7 +189,7 @@ const interval = setInterval(function ping() {
         ws.isAlive = false;
         ws.ping(noop);
     });
-}, 2000);
+}, 10000);
 
 wss.on('close', function close() {
     clearInterval(interval);
