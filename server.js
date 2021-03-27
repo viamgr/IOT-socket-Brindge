@@ -66,6 +66,8 @@ function sendEventToPaired(me, key, value) {
         let body = JSON.stringify({key: key, message: value});
         paired.ws.send(body);
     } else {
+        let body = JSON.stringify({key: "server:reject", message: {code: 401}});
+        me.ws.send(body);
         console.log("Can not find paired client. " + paired);
     }
 }
@@ -144,6 +146,7 @@ wss.on('connection', function connection(ws, request, client) {
                     ws.send(JSON.stringify({key: "server:time", value: Math.floor(new Date().getTime() / 1000)}));
                     break;
                 case "device:paired":
+                    // in ezafe nist ? vase chie?
                     sendPairedSignal(me.id);
                     break;
                 case "client:subscribe":
