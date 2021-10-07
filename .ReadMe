@@ -1,0 +1,9 @@
+homestead up
+
+
+
+cd feederjs/
+nodemon . -L --ignore public/
+
+
+http://127.0.0.1:4200/client/client.html

@@ -21,10 +21,12 @@ function sendSlice(start, end) {
 }
 
 function connect() {
-    ws = new WebSocket(`ws://${location.host}`);
+    let url = `ws://192.168.4.1:4200/`;
+    // let url = `ws://${location.host}`;
+    ws = new WebSocket(url);
     ws.binaryType = 'arraybuffer';
 
-    console.log(`ws://${location.host}`);
+    console.log(url);
 
     ws.onopen = function () {
         // subscribe to some channels
@@ -37,6 +39,7 @@ function connect() {
             var json = JSON.parse(e.data);
             switch (json.key) {
                 case "server:text":
+                case "device:text":
                     switch (json.message.key) {
                         case "file:send:slice":
                             sendSlice(json.message.start, json.message.end);
@@ -54,6 +57,12 @@ function connect() {
                 case "server:unpaired":
                     console.log("server:unpaired");
                     cancelSendingFile();
+                    break;
+                case "device:time":
+                    ws.send(JSON.stringify({key: "client:time", value: Math.floor(new Date().getTime() / 1000)}));
+                    break;
+                case "device:subscribe":
+                    ws.send(JSON.stringify({key: "client:paired", message: deviceId}))
                     break;
             }
         } else {
@@ -95,6 +104,8 @@ function connect() {
 function requestPair() {
     if (deviceId) {
         let body = JSON.stringify({key: "client:pair", message: deviceId});
+        console.log(body)
+
         ws.send(body);
     }
 }
