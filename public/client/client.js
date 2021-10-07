@@ -46,10 +46,7 @@ function connect() {
                             break;
                         case "file:detail:callback":
                             fileSize = json.message.length;
-                            ws.send(JSON.stringify({
-                                key: "client:text",
-                                message: {key: 'file:request:slice', start: 0}
-                            }));
+                            ws.send(JSON.stringify( {key: 'file:request:slice', start: 0}));
                             break;
                     }
                     $("#setResult").text(JSON.stringify(json));
@@ -70,15 +67,9 @@ function connect() {
             receivedChunkSize += e.data.byteLength;
 
             if (receivedChunkSize < fileSize) {
-                ws.send(JSON.stringify({
-                    key: "client:text",
-                    message: {key: 'file:request:slice', start: receivedChunkSize}
-                }));
+                ws.send(JSON.stringify({key: 'file:request:slice', start: receivedChunkSize}));
             } else {
-                ws.send(JSON.stringify({
-                    key: "client:text",
-                    message: {key: 'file:request:finished'}
-                }));
+                ws.send(JSON.stringify({key: 'file:request:finished'}));
             }
             // let $fileResult = $("#fileResult");
             // $fileResult.text($fileResult.text() + new TextDecoder().decode(e.data));
@@ -115,7 +106,7 @@ $(function () {
     $("#form").submit(function (ev) {
         ev.preventDefault();
         var message = $("#message").val();
-        let body = JSON.stringify({key: "client:text", message: JSON.parse(message)});
+        let body = JSON.stringify(JSON.parse(message));
         ws.send(body);
     });
 
@@ -129,10 +120,7 @@ $(function () {
         if (deviceId) {
             let name = $("#setKey").val();
             let value = $("#setValue").val();
-            let body = JSON.stringify({
-                key: "client:text",
-                message: {key: 'set', name: name, value: value}
-            });
+            let body = JSON.stringify({key: 'set', name: name, value: value});
             $("#setResult").text("Loading");
             console.log(body);
             ws.send(body);
@@ -153,13 +141,12 @@ $(function () {
         };
 
         ws.send(JSON.stringify({
-            key: 'client:text', message: {
                 key: 'file:send:start',
                 name: firstFile.name,
                 size: firstFile.size,
                 type: firstFile.type,
             }
-        }));
+        ));
     });
 
     $("#requestFile").submit(function (ev) {
@@ -168,10 +155,9 @@ $(function () {
         ev.preventDefault();
         $("#fileResult").text('');
         ws.send(JSON.stringify({
-            key: 'client:text', message: {
                 key: 'file:detail:request',
                 name: $('#fileName').val()
             }
-        }));
+        ));
     });
 });
