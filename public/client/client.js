@@ -38,20 +38,18 @@ function connect() {
             console.log('Message:', e.data);
             var json = JSON.parse(e.data);
             switch (json.key) {
-                case "server:text":
-                case "device:text":
-                    switch (json.message.key) {
-                        case "file:send:slice":
-                            sendSlice(json.message.start, json.message.end);
-                            break;
-                        case "file:detail:callback":
-                            fileSize = json.message.length;
-                            ws.send(JSON.stringify( {key: 'file:request:slice', start: 0}));
-                            break;
-                    }
+                case "file:send:slice":
+                    sendSlice(json.start, json.end);
                     $("#setResult").text(JSON.stringify(json));
+
                     break;
-                case "server:unpaired":
+                case "file:detail:callback":
+                    fileSize = json.length;
+                    ws.send(JSON.stringify( {key: 'file:request:slice', start: 0}));
+                    $("#setResult").text(JSON.stringify(json));
+
+                    break;
+                case "unpaired":
                     console.log("server:unpaired");
                     cancelSendingFile();
                     break;
@@ -87,7 +85,7 @@ function connect() {
 
     ws.onerror = function (err) {
         cancelSendingFile();
-        console.error('Socket encountered error: ', err.message, 'Closing socket');
+        console.error('Socket encountered error: ', err, 'Closing socket');
         ws.close();
     };
 }
