@@ -21,8 +21,9 @@ function sendSlice(start, end) {
 }
 
 function connect() {
-    let url = `ws://192.168.4.1:4200/`;
+    // let url = `ws://192.168.4.1:4200/`;
     // let url = `ws://${location.host}`;
+    let url = `ws://192.168.1.50:4200/`;
     ws = new WebSocket(url);
     ws.binaryType = 'arraybuffer';
 
@@ -57,7 +58,7 @@ function connect() {
                     ws.send(JSON.stringify({key: "client:time", value: Math.floor(new Date().getTime() / 1000)}));
                     break;
                 case "device:subscribe":
-                    ws.send(JSON.stringify({key: "client:paired", message: deviceId}))
+                    ws.send(JSON.stringify({key: "client:paired", value: deviceId}))
                     break;
             }
         } else {
@@ -92,7 +93,7 @@ function connect() {
 
 function requestPair() {
     if (deviceId) {
-        let body = JSON.stringify({key: "client:pair", message: deviceId});
+        let body = JSON.stringify({key: "client:pair", value: deviceId});
         console.log(body)
 
         ws.send(body);

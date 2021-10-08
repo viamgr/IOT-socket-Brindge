@@ -63,10 +63,10 @@ function sendEventToPaired(me, key, value) {
     console.log(`sendMessage:`, key, value);
     let paired = getPairedClient(me);
     if (paired && paired.ws) {
-        let body = JSON.stringify({key: key, message: value});
+        let body = JSON.stringify(value);
         paired.ws.send(body);
     } else {
-        let body = JSON.stringify({key: "server:reject", message: {code: 401}});
+        let body = JSON.stringify({key: "server:reject", value: 401});
         me.ws.send(body);
         console.log("Can not find paired client. " + paired);
     }
@@ -82,7 +82,7 @@ function pair(ws, me, deviceId) {
         myClient.connectedTo = deviceId;
         let paired = findClientById(deviceId);
         if (paired) {
-            paired.ws.send(JSON.stringify({key: "server:pair", message: me.id}));
+            paired.ws.send(JSON.stringify({key: "pair", message: me.id}));
         }
     }
 }
@@ -106,7 +106,7 @@ function sendPairedSignal(myId) {
 
 function unpairAndRemove(me) {
     console.log("unpairAndRemove");
-    sendEventToPaired(me, "server:unpaired", me.id);
+    sendEventToPaired(me, "server:unpaired", {key: 'server:unpaired', 'value': me.id});
     removeClient(me.id);
 }
 
@@ -139,7 +139,7 @@ wss.on('connection', function connection(ws, request, client) {
             }
             switch (json.key) {
                 case "device:subscribe":
-                    me = addClient(json.message, ws, true);
+                    me = addClient(json.value, ws, true);
                     sendPairedSignal(me.id);
                     break;
                 case "device:time":
@@ -153,12 +153,11 @@ wss.on('connection', function connection(ws, request, client) {
                     me = addClient(Math.random(), ws, false);
                     break;
                 case "client:pair":
-                    let deviceId = json.message;
+                    let deviceId = json.value;
                     pair(ws, me, deviceId);
                     break;
-                case "device:text":
-                case "client:text":
-                    sendEventToPaired(me, "server:text", json.message);
+                default:
+                    sendEventToPaired(me, "server:text", json);
                     break;
             }
         } else {
