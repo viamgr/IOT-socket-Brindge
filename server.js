@@ -59,8 +59,8 @@ function getPairedClient(me) {
     return paired;
 }
 
-function sendEventToPaired(me, key, value) {
-    console.log(`sendMessage:`, key, value);
+function sendEventToPaired(me, value) {
+    console.log(`sendMessage:`, value);
     let paired = getPairedClient(me);
     if (paired && paired.ws) {
         let body = JSON.stringify(value);
@@ -73,16 +73,17 @@ function sendEventToPaired(me, key, value) {
 }
 
 function pair(ws, me, deviceId) {
+    console.log(`Pairing: ${me.id} to ${deviceId}`);
+
     if (findClientByConnectedToId(deviceId)) {
         ws.send(JSON.stringify({key: "server:duplicated"}));
     } else {
 
-        console.log(`Pairing: ${me.id} to ${deviceId}`);
         let myClient = findClientById(me.id);
         myClient.connectedTo = deviceId;
         let paired = findClientById(deviceId);
         if (paired) {
-            paired.ws.send(JSON.stringify({key: "pair", message: me.id}));
+            paired.ws.send(JSON.stringify({key: "pair", value: me.id}));
         }
     }
 }
@@ -99,14 +100,14 @@ function unpair(myId) {
 function sendPairedSignal(myId) {
     let pairRequestedClient = findClientByConnectedToId(myId);
     if (pairRequestedClient) {
-        pairRequestedClient.ws.send(JSON.stringify({key: "server:paired", message: myId}))
+        pairRequestedClient.ws.send(JSON.stringify({key: "server:paired", value: myId}))
     }
 
 }
 
 function unpairAndRemove(me) {
     console.log("unpairAndRemove");
-    sendEventToPaired(me, "server:unpaired", {key: 'server:unpaired', 'value': me.id});
+    sendEventToPaired(me, {key: 'server:unpaired', 'value': me.id});
     removeClient(me.id);
 }
 
@@ -152,12 +153,12 @@ wss.on('connection', function connection(ws, request, client) {
                 case "client:subscribe":
                     me = addClient(Math.random(), ws, false);
                     break;
-                case "client:pair":
+                case "pair":
                     let deviceId = json.value;
                     pair(ws, me, deviceId);
                     break;
                 default:
-                    sendEventToPaired(me, "server:text", json);
+                    sendEventToPaired(me, json);
                     break;
             }
         } else {

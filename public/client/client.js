@@ -23,7 +23,8 @@ function sendSlice(start, end) {
 function connect() {
     // let url = `ws://192.168.4.1:4200/`;
     // let url = `ws://${location.host}`;
-    let url = `ws://192.168.1.50:4200/`;
+    // let url = `ws://192.168.1.50:4200/`;
+    let url = $("#socketUrl").val();
     ws = new WebSocket(url);
     ws.binaryType = 'arraybuffer';
 
@@ -46,7 +47,7 @@ function connect() {
                     break;
                 case "file:detail:callback":
                     fileSize = json.length;
-                    ws.send(JSON.stringify( {key: 'file:request:slice', start: 0}));
+                    ws.send(JSON.stringify({key: 'file:request:slice', start: 0}));
                     $("#setResult").text(JSON.stringify(json));
 
                     break;
@@ -81,7 +82,7 @@ function connect() {
         console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
         setTimeout(function () {
             connect();
-        }, 1000);
+        }, 4000);
     };
 
     ws.onerror = function (err) {
@@ -93,7 +94,7 @@ function connect() {
 
 function requestPair() {
     if (deviceId) {
-        let body = JSON.stringify({key: "client:pair", value: deviceId});
+        let body = JSON.stringify({key: "pair", value: deviceId});
         console.log(body)
 
         ws.send(body);
