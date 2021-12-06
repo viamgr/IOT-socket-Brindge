@@ -14,7 +14,6 @@ let wsClients = [];
 function addClient(myId, ws, isDevice) {
     let client = findClientById(myId);
     if (client) {
-        ws.send(JSON.stringify({key: "server:duplicated"}));
         console.log(`Client: ` + myId + ` Duplicated`);
         return client;
     } else {
@@ -48,7 +47,7 @@ function findClientByConnectedToId(id) {
 }
 
 function getPairedClient(me) {
-    console.log(`Finding paired client: ${me.id} isDevice:${me.isDevice} isConnectedTo:${me.isConnected}`);
+    console.log(`Finding paired client: ${me.id} isDevice:${me.isDevice} isConnectedTo:${me.connectedTo}`);
     let paired;
     if (me && me.isDevice) {
         paired = findClientByConnectedToId(me.id);
@@ -64,6 +63,8 @@ function sendEventToPaired(me, value) {
     let paired = getPairedClient(me);
     if (paired && paired.ws) {
         let body = JSON.stringify(value);
+		console.log("send message to paired . " , paired.id,body);
+
         paired.ws.send(body);
     } else {
         let body = JSON.stringify({key: "server:reject", value: 401});
@@ -76,7 +77,8 @@ function pair(ws, me, deviceId) {
     console.log(`Pairing: ${me.id} to ${deviceId}`);
 
     if (findClientByConnectedToId(deviceId)) {
-        ws.send(JSON.stringify({key: "server:duplicated"}));
+        console.log("Failed to find paired")
+        ws.send(JSON.stringify({key: "pair:error","value":"duplicated"}));
     } else {
 
         let myClient = findClientById(me.id);
@@ -84,6 +86,10 @@ function pair(ws, me, deviceId) {
         let paired = findClientById(deviceId);
         if (paired) {
             paired.ws.send(JSON.stringify({key: "pair", value: me.id}));
+        }
+        else{
+            console.log("pair client is offline")
+            ws.send(JSON.stringify({key: "pair:error","value":"pair client is offline"}));
         }
     }
 }
@@ -97,17 +103,24 @@ function unpair(myId) {
     } else return false;
 }
 
+function sendSubscribedSignal(ws,myId,isDevice){
+	ws.send(JSON.stringify({key: "subscribe:done"}));
+	if(isDevice)
+	{
+		sendPairedSignal(myId)
+	}
+}
 function sendPairedSignal(myId) {
     let pairRequestedClient = findClientByConnectedToId(myId);
     if (pairRequestedClient) {
-        pairRequestedClient.ws.send(JSON.stringify({key: "server:paired", value: myId}))
+        pairRequestedClient.ws.send(JSON.stringify({key: "pair:done", value: myId}))
     }
 
 }
 
 function unpairAndRemove(me) {
     console.log("unpairAndRemove");
-    sendEventToPaired(me, {key: 'server:unpaired', 'value': me.id});
+    sendEventToPaired(me, {key: 'unpair', 'value': me.id});
     removeClient(me.id);
 }
 
@@ -139,26 +152,26 @@ wss.on('connection', function connection(ws, request, client) {
                 return;
             }
             switch (json.key) {
-                case "device:subscribe":
-                    me = addClient(json.value, ws, true);
-                    sendPairedSignal(me.id);
+                case "subscribe":
+					let id = json.value || Math.random();
+					let isDevice = json.value?true:false;
+                    me = addClient(id, ws, isDevice);
+                    sendSubscribedSignal(ws,me.id,isDevice);
                     break;
                 case "device:time":
                     ws.send(JSON.stringify({key: "server:time", value: Math.floor(new Date().getTime() / 1000)}));
                     break;
-                case "device:paired":
+                case "paired":
                     // in ezafe nist ? vase chie?
                     sendPairedSignal(me.id);
-                    break;
-                case "client:subscribe":
-                    me = addClient(Math.random(), ws, false);
                     break;
                 case "pair":
                     let deviceId = json.value;
                     pair(ws, me, deviceId);
                     break;
                 default:
-                    sendEventToPaired(me, json);
+					if(me)
+						sendEventToPaired(me, json);
                     break;
             }
         } else {
