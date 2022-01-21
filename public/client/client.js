@@ -32,7 +32,7 @@ function connect() {
 
     ws.onopen = function () {
         // subscribe to some channels
-        ws.send(JSON.stringify({key: "client:subscribe"}));
+        ws.send(JSON.stringify({key: "subscribe"}));
         requestPair();
     };
     ws.onmessage = function (e) {
